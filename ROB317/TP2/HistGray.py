@@ -29,7 +29,7 @@ plt.show()
 
 while(ret):
     plt.figure(1)
-    cv2.imshow('Image et Champ de vitesses (Farnebäck)',gray)
+    cv2.imshow('Image noir et blanc',gray)
     lineGray.set_ydata(hist)
     fig.canvas.draw()
     k = cv2.waitKey(15) & 0xff
