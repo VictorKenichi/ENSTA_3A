@@ -1,15 +1,30 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+from argparse import ArgumentParser
 
 #bin = 32 # nombre de bins
 r = 1
 q = 1
 
-cap = cv2.VideoCapture("./Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
-#cap = cv2.VideoCapture("./Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
-#cap = cv2.VideoCapture("./Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
-#cap = cv2.VideoCapture(0)
+# module pour utiliser une ligne pour taper les arguments d'un fichier sur le terminal
+parser = ArgumentParser()
+parser.add_argument(dest="video", type=int, help="video d'entrée")
+input_args = parser.parse_args()
+video = int(input_args.video)
+
+if video == 1:
+    cap = cv2.VideoCapture("./Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
+elif video == 2:
+    cap = cv2.VideoCapture("./Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+elif video == 3:
+    cap = cv2.VideoCapture("./Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
+elif video == 4:
+    cap = cv2.VideoCapture("./Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
+elif video == 5:
+    cap = cv2.VideoCapture("./Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+else:
+    cap = cv2.VideoCapture(0)
 
 ret, frame1 = cap.read() # Passe à l'image suivante
 yuv = cv2.cvtColor(frame1, cv2.COLOR_BGR2YCrCb)

@@ -1,9 +1,37 @@
 import cv2
 import numpy as np
+import pandas as pd
+from sklearn.metrics import confusion_matrix
 from matplotlib import pyplot as plt
+from argparse import ArgumentParser
 
-cap = cv2.VideoCapture("./Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
-#cap = cv2.VideoCapture("./Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
+# module pour utiliser une ligne pour taper les arguments d'un fichier sur le terminal
+parser = ArgumentParser()
+parser.add_argument(dest="video", type=int, help="video d'entrée")
+input_args = parser.parse_args()
+video = int(input_args.video)
+
+if video == 1:
+    cap = cv2.VideoCapture("./Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
+    montageTest = pd.read_csv("./Montage/Montage_1.csv", index_col=0)
+elif video == 2:
+    cap = cv2.VideoCapture("./Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+    montageTest = pd.read_csv("./Montage/Montage_2.csv", index_col=0)
+elif video == 3:
+    cap = cv2.VideoCapture("./Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
+    montageTest = pd.read_csv("./Montage/Montage_3.csv", index_col=0)
+elif video == 4:
+    cap = cv2.VideoCapture("./Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
+    montageTest = pd.read_csv("./Montage/Montage_4.csv", index_col=0)
+elif video == 5:
+    cap = cv2.VideoCapture("./Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+    montageTest = pd.read_csv("./Montage/Montage_5.csv", index_col=0)
+else:
+    cap = cv2.VideoCapture(0)
+    montageTest = pd.read_csv("./Montage/Montage_0.csv", index_col=0)
+
+cutTest = montageTest["Raccord"].to_numpy()
+cutHistUV = np.zeros_like(cutTest)
 
 index = 1
 mse = 0
@@ -15,7 +43,7 @@ hist = hist/256**2
 
 # Paramètres de l'algorithem
 kernel = 3 # voisinage consideré
-tol = 0.2 # tolerance
+tol = 0.05 # tolerance
 
 fig, ax = plt.subplots()
 ax.set_title('Histogram 1D du Niveau de Gris')
@@ -40,13 +68,12 @@ while(ret):
         cv2.imwrite('OF_gray_%04d.png'%index,gray)
     hist_old = hist.copy()
     ret, frame = cap.read()
-    index += 1
     if(ret):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         hist = cv2.calcHist([gray], [0], None, [256], [0,256])
         hist = hist/256**2
         mse = 0
-        for i in range(kernel-kernel):
+        for i in range(kernel//2,256-kernel//2):
             if hist[i][0] != 0:
                 diff_min = (hist[i][0]-hist_old[i][0])**2
                 for i2 in range(-kernel//2+1,kernel//2):
@@ -56,8 +83,13 @@ while(ret):
                 mse += diff_min
         if mse>tol:
             cut += 1
+            cutHistUV[index] = 1
             print(f'''index = {index}''')
             print(f'''mse = {mse}''')
+        index += 1
 print(f'''Nombre des raccords : {cut}''')
+print('Matrice de confusion:')
+print(pd.DataFrame(confusion_matrix(cutTest,cutHistUV)))
+
 cap.release()
 cv2.destroyAllWindows()
