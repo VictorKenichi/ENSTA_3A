@@ -16,23 +16,23 @@ input_args = parser.parse_args()
 video = int(input_args.video)
 
 if video == 1:
-    cap = cv2.VideoCapture("./Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
-    montageTest = pd.read_csv("./Montage/Montage_1.csv", index_col=0)
+    cap = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
+    montageTest = pd.read_csv("../Montage/Montage_1.csv", index_col=0)
 elif video == 2:
-    cap = cv2.VideoCapture("./Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
-    montageTest = pd.read_csv("./Montage/Montage_2.csv", index_col=0)
+    cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+    montageTest = pd.read_csv("../Montage/Montage_2.csv", index_col=0)
 elif video == 3:
-    cap = cv2.VideoCapture("./Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
-    montageTest = pd.read_csv("./Montage/Montage_3.csv", index_col=0)
+    cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
+    montageTest = pd.read_csv("../Montage/Montage_3.csv", index_col=0)
 elif video == 4:
-    cap = cv2.VideoCapture("./Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
-    montageTest = pd.read_csv("./Montage/Montage_4.csv", index_col=0)
+    cap = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
+    montageTest = pd.read_csv("../Montage/Montage_4.csv", index_col=0)
 elif video == 5:
-    cap = cv2.VideoCapture("./Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
-    montageTest = pd.read_csv("./Montage/Montage_5.csv", index_col=0)
+    cap = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+    montageTest = pd.read_csv("../Montage/Montage_5.csv", index_col=0)
 else:
     cap = cv2.VideoCapture(0)
-    montageTest = pd.read_csv("./Montage/Montage_0.csv", index_col=0)
+    montageTest = pd.read_csv("../Montage/Montage_0.csv", index_col=0)
 
 cutTest = montageTest["Raccord"].to_numpy()
 cutHist = np.zeros_like(cutTest)

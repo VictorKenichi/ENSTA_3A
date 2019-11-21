@@ -19,4 +19,4 @@ data[2307][0] = 1
 
 df = pd.DataFrame(data, columns=["Raccord","Mouvement de plan"])
 
-df.to_csv('./Montage/Montage_3.csv')
+df.to_csv('../Montage/Montage_3.csv')

@@ -1,9 +1,9 @@
 import numpy as np
 import cv2
 
-#cap = cv2.VideoCapture('./Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v')
-#cap = cv2.VideoCapture("./Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
-#cap = cv2.VideoCapture("./Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
+cap = cv2.VideoCapture('../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v')
+#cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+#cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
 
 # Paramètres du détecteur de points d'intérêt
 feature_params = dict( maxCorners = 10000,
