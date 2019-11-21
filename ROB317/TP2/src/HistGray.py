@@ -46,7 +46,7 @@ w = frame.shape[1]
 
 # Paramètres de l'algorithem
 kernel = 3    # voisinage consideré
-tol    = 0.05 # tolerance
+tol    = 0.15 # tolerance
 
 fig, ax = plt.subplots()
 ax.set_title('Histogram 1D du Niveau de Gris')
@@ -63,7 +63,7 @@ while(ret):
     cv2.imshow('Image noir et blanc',gray)
     lineGray.set_ydata(hist/(h*w))
     fig.canvas.draw()
-    k = cv2.waitKey(15) & 0xff
+    k = cv2.waitKey(5) & 0xff
     if k == 27:
         break
     elif k == ord('s'):

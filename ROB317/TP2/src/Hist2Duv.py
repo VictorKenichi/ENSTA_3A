@@ -1,57 +1,62 @@
 import cv2
-import numpy as np
+import numpy  as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix
-from matplotlib import pyplot as plt
-from argparse import ArgumentParser
+from   sklearn.metrics import confusion_matrix
+from   matplotlib      import pyplot           as plt
+from   argparse        import ArgumentParser
 
 # Paramètres de l'algorithem
 bin = 32 # nombre de bins
 tol = 0.2 # tolerence
 
 # module pour utiliser une ligne pour taper les arguments d'un fichier sur le terminal
-parser = ArgumentParser()
+parser     = ArgumentParser()
 parser.add_argument(dest="video", type=int, help="video d'entrée")
 input_args = parser.parse_args()
-video = int(input_args.video)
+video      = int(input_args.video)
 
 if video == 1:
-    cap = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
+    cap         = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_1.csv", index_col=0)
+
 elif video == 2:
-    cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+    cap         = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_2.csv", index_col=0)
+
 elif video == 3:
-    cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
+    cap         = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_3.csv", index_col=0)
+
 elif video == 4:
-    cap = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
+    cap         = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_4.csv", index_col=0)
+
 elif video == 5:
-    cap = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+    cap         = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_5.csv", index_col=0)
+
 else:
-    cap = cv2.VideoCapture(0)
+    cap         = cv2.VideoCapture(0)
     montageTest = pd.read_csv("../Montage/Montage_0.csv", index_col=0)
 
-cutTest = montageTest["Raccord"].to_numpy()
-cutHist = np.zeros_like(cutTest)
+cutTest    = montageTest["Raccord"].to_numpy()
+cutHist    = np.zeros_like(cutTest)
 
-index = 1
-cut = 0
-nTicks = 4
+index      = 1
+cut        = 0
+nTicks     = 4
 ret, frame = cap.read()
-yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
-hist = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
+yuv        = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
+hist       = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
 
-h = frame.shape[0]
-w = frame.shape[1]
+h          = frame.shape[0]
+w          = frame.shape[1]
 
 plot = 0
 
 if plot == 1:
     fig, ax = plt.subplots()
-    ln, = plt.plot([],[],'ro')
+    ln,     = plt.plot([],[],'ro')
     ax.set_title('Histogram 2D de (u,v)')
     ax.set_xlabel('v')
     ax.set_ylabel('u')
@@ -74,11 +79,11 @@ while(ret):
     elif k == ord('s'):
         cv2.imwrite('Frame_%04d.png'%index,frame)
         cv2.imwrite('OF_Yuv_%04d.png'%index,yuv)
-    hist_old = hist.copy()
+    hist_old   = hist.copy()
     ret, frame = cap.read()
     if(ret):
-        yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
-        hist = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
+        yuv   = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
+        hist  = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
         hTest = cv2.compareHist(hist_old,hist,0)
         if hTest<1-tol:
             if index > 1:
@@ -88,17 +93,15 @@ while(ret):
             else:
                 cut += 1
                 cutHist[index] = 1
-#            print(f'''index = {index}''')
-#            print(f'''Correlation = {hTest}''')
         index += 1
 
 cf = confusion_matrix(cutTest,cutHist)
 print(f'''Nombre des raccords : {cut}''')
 print('Matrice de confusion:')
 print(pd.DataFrame(cf))
-print(f'''Accuracy : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])}%''')
+print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])}%''')
 print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1])}%''')
-print(f'''Recall : {100*cf[1][1]/(cf[1][0]+cf[1][1])}%''')
+print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1])}%''')
 
 
 cap.release()
