@@ -28,7 +28,7 @@ ret, frame = cap.read() # Passe à l'image suivante
 while(ret):
     cv2.imwrite('../Images/Frame_%04d.png'%index,frame)
     cv2.imshow('Images',frame)
-    k = cv2.waitKey(15) & 0xff
+    k = cv2.waitKey(5) & 0xff
     ret, frame = cap.read()
     index += 1
 
