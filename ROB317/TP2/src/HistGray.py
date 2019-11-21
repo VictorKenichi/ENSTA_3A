@@ -31,7 +31,10 @@ else:
     montageTest = pd.read_csv("./Montage/Montage_0.csv", index_col=0)
 
 cutTest = montageTest["Raccord"].to_numpy()
-cutHistUV = np.zeros_like(cutTest)
+cutHist = np.zeros_like(cutTest)
+
+h = frame.shape[0]
+w = frame.shape[1]
 
 index = 1
 mse = 0
@@ -82,13 +85,18 @@ while(ret):
                         diff_min = diff
                 mse += diff_min
         if mse>tol:
-            cut += 1
-            cutHistUV[index] = 1
-            print(f'''index = {index}''')
-            print(f'''mse = {mse}''')
+            if index > 1:
+                if cutHist[index-1] == 0:
+                    cut += 1
+                    cutHist[index] = 1
+            else:
+                cut += 1
+                cutHist[index] = 1
+#            print(f'''index = {index}''')
+#            print(f'''mse = {mse}''')
         index += 1
 
-cf = confusion_matrix(cutTest,cutHistUV)
+cf = confusion_matrix(cutTest,cutHist)
 print(f'''Nombre des raccords : {cut}''')
 print('Matrice de confusion:')
 print(pd.DataFrame(cf))

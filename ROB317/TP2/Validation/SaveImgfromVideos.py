@@ -1,7 +1,7 @@
 import cv2
-import numpy                    as np
-from   matplotlib import pyplot as plt
-from   argparse   import ArgumentParser
+import numpy as np
+from matplotlib import pyplot as plt
+from argparse import ArgumentParser
 
 # module pour utiliser une ligne pour taper les arguments d'un fichier sur le terminal
 parser = ArgumentParser()
