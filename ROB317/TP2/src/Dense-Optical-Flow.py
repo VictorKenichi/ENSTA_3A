@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
+
+from   matplotlib import pyplot as plt
 
 cap = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
 

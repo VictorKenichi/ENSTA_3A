@@ -1,6 +1,7 @@
 import cv2
 import numpy  as np
 import pandas as pd
+
 from   sklearn.metrics import confusion_matrix
 from   matplotlib      import pyplot as plt
 from   argparse        import ArgumentParser
@@ -20,36 +21,41 @@ if video == 1:
     cap = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_1.csv", index_col=0)
     tol = 0.6
+
 elif video == 2:
     cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_2.csv", index_col=0)
+
 elif video == 3:
     cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_3.csv", index_col=0)
+
 elif video == 4:
     cap = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_4.csv", index_col=0)
+
 elif video == 5:
     cap = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_5.csv", index_col=0)
+
 else:
-    cap = cv2.VideoCapture(0)
+    cap         = cv2.VideoCapture(0)
     montageTest = pd.read_csv("../Montage/Montage_0.csv", index_col=0)
 
-cutTest = montageTest["Raccord"].to_numpy()
-cutHist = np.zeros_like(cutTest)
+cutTest         = montageTest["Raccord"].to_numpy()
+cutHist         = np.zeros_like(cutTest)
+    
+    
+ret, frame0     = cap.read() # Passe à l'image suivante
+prvs1           = cv2.cvtColor(frame0,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
+    
+ret, frame1     = cap.read() # Passe à l'image suivante
+prvs            = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
+bgrPolar1       = np.zeros(shape=(frame1.shape[0],frame1.shape[1],2), dtype='float32') # Image nulle de même taille que flow
+bgrPolar2       = np.copy(bgrPolar1)
 
-
-ret, frame0 = cap.read() # Passe à l'image suivante
-prvs1       = cv2.cvtColor(frame0,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
-
-ret, frame1 = cap.read() # Passe à l'image suivante
-prvs        = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
-bgrPolar1   = np.zeros(shape=(frame1.shape[0],frame1.shape[1],2), dtype='float32') # Image nulle de même taille que flow
-bgrPolar2   = np.copy(bgrPolar1)
-
-h = frame1.shape[0]
-w = frame1.shape[1]
+h           = frame1.shape[0]
+w           = frame1.shape[1]
 
 cut         = 0
 index       = 1
