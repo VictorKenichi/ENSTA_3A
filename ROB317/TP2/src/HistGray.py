@@ -12,12 +12,16 @@ parser.add_argument(dest="video", type=int, help="video d'entrée")
 input_args = parser.parse_args()
 video      = int(input_args.video)
 
+bin    = 256    # voisinage consideré
+tol    = 0.5 # tolerance
+
 if video == 1:
     cap = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_1.csv", index_col=0)
 elif video == 2:
     cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_2.csv", index_col=0)
+    tol    = 0.4
 elif video == 3:
     cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_3.csv", index_col=0)
@@ -39,21 +43,19 @@ mse        = 0
 cut        = 0
 ret, frame = cap.read()
 gray       = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-hist       = cv2.calcHist([gray], [0], None, [256], [0,256])
+hist       = cv2.calcHist([gray], [0], None, [bin], [0,256])
 
 h = frame.shape[0]
 w = frame.shape[1]
 
 # Paramètres de l'algorithem
-kernel = 3    # voisinage consideré
-tol    = 0.05 # tolerance
 
 fig, ax = plt.subplots()
 ax.set_title('Histogram 1D du Niveau de Gris')
 ax.set_xlabel('Niveau de Gris')
 ax.set_ylabel('Frequence')
-lineGray, = ax.plot(np.arange(256), np.zeros((256,)), c='k', lw=3)
-ax.set_xlim(0, 255)
+lineGray, = ax.plot(np.arange(bin), np.zeros((bin,)), c='k', lw=3)
+ax.set_xlim(0, bin-1)
 ax.set_ylim(0, 1)
 plt.ion()
 plt.show()
@@ -74,30 +76,23 @@ while(ret):
 
     if(ret):
         gray  = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        hist  = cv2.calcHist([gray], [0], None, [256], [0,256])
+        hist  = cv2.calcHist([gray], [0], None, [bin], [0,256])
         hTest = cv2.compareHist(hist_old,hist,0)
 
         if hTest < 1 - tol:
-            if index > 1:
-                if cutHist[index-1] == 0:
-                    cut += 1
-                    cutHist[index] = 1
-            else:
-                cut += 1
-                cutHist[index] = 1
-
-            print(f'''index = {index}''')
-            print(f'''Correlation = {hTest}''')
+            cut += 1
+            cutHist[index] = 1
 
         index += 1
 
 cf = confusion_matrix(cutTest,cutHist)
+print(f'''Tolerance           : {tol}''')
 print(f'''Nombre des raccords : {cut}''')
-print('Matrice de confusion:')
+print('Matrice de confusion   :')
 print(pd.DataFrame(cf))
-print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])}%''')
-print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1])}%''')
-print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1])}%''')
+print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])} %''')
+print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1])} %''')
+print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1])} %''')
 
 cap.release()
 cv2.destroyAllWindows()

@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 #bin = 32 # nombre de bins
 r = 4
 q = 1
-tol = 0.6
+tol = 0.1
 
 # module pour utiliser une ligne pour taper les arguments d'un fichier sur le terminal
 parser = ArgumentParser()
@@ -23,22 +23,25 @@ if video == 1:
 elif video == 2:
     cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_2.csv", index_col=0)
+    tol = 0.5
 elif video == 3:
     cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_3.csv", index_col=0)
+    tol = 0.2
 elif video == 4:
     cap = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_4.csv", index_col=0)
+    tol = 0.7
 elif video == 5:
     cap = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
     montageTest = pd.read_csv("../Montage/Montage_5.csv", index_col=0)
+    tol = 0.6
 else:
     cap = cv2.VideoCapture(0)
     montageTest = pd.read_csv("../Montage/Montage_0.csv", index_col=0)
 
 cutTest = montageTest["Raccord"].to_numpy()
 cutHist = np.zeros_like(cutTest)
-
 
 ret, frame0 = cap.read() # Passe à l'image suivante
 prvs1 = cv2.cvtColor(frame0,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
@@ -77,7 +80,7 @@ flow1 = cv2.calcOpticalFlowFarneback(prvs1,prvs,None,
 mag1, ang1 = cv2.cartToPolar(flow1[:,:,0], flow1[:,:,1]) # Conversion cartésien vers polaire
 bgrPolar1[:,:,0] = 180*ang1/(2*np.pi)
 bgrPolar1[:,:,1] = 180*mag1/np.amax(mag1) # Valeur <--> Norme
-hist1 = cv2.calcHist([bgrPolar1], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+histFOOld = cv2.calcHist([bgrPolar1], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
 
 while(ret):
     flow2 = cv2.calcOpticalFlowFarneback(next,prvs,None,
@@ -92,42 +95,36 @@ while(ret):
     mag2, ang2 = cv2.cartToPolar(flow2[:,:,0], flow2[:,:,1]) # Conversion cartésien vers polaire
     bgrPolar2[:,:,0] = 180*ang2/(2*np.pi)
     bgrPolar2[:,:,1] = 180*mag2/np.amax(mag2) # Valeur <--> Norme
-#    cv2.imshow('Histogram 2D de (Vx,Vy)', hist1/(h*w))
+#    cv2.imshow('Histogram 2D de (Vx,Vy)', histFOOld/(h*w))
 
-    hist2 = cv2.calcHist([bgrPolar2], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
-#    cv2.imshow('Histogram 2D de (Vx,Vy)', hist2/(h*w))
+    histFONew = cv2.calcHist([bgrPolar2], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+#    cv2.imshow('Histogram 2D de (Vx,Vy)', histFONew/(h*w))
 
-    hTest = cv2.compareHist(hist2,hist1,0)
+    hTest = cv2.compareHist(histFONew,histFOOld,0)
 
-    result = np.vstack((hist1/180,hist2/180))
+    result = np.vstack((histFOOld/np.amax(histFOOld),histFONew/np.amax(histFONew)))
 
     cv2.imshow('Extrait',frame2)
     cv2.imshow('Histogram de Champs de vitesses (Farnebäck)',result)
-    k = cv2.waitKey(15) & 0xff
+    k = cv2.waitKey(10) & 0xff
     prvs = next
-    hist1 = hist2
+    histFOOld = histFONew
     ret, frame2 = cap.read()
     if (ret):
         next = cv2.cvtColor(frame2,cv2.COLOR_BGR2GRAY)
         if hTest<1-tol:
-            if index > 1:
-                if cutHist[index-1] == 0:
-                    cut += 1
-                    cutHist[index] = 1
-            else:
-                cut += 1
-                cutHist[index] = 1
-#            print(f'''index = {index}''')
-#            print(f'''Correlation = {hTest}''')
+            cut += 1
+            cutHist[index] = 1
         index += 1
 
 cf = confusion_matrix(cutTest,cutHist)
+print(f'''Tolerance           : {tol}''')
 print(f'''Nombre des raccords : {cut}''')
-print('Matrice de confusion:')
+print('Matrice de confusion   :')
 print(pd.DataFrame(cf))
-print(f'''Accuracy : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])}%''')
-print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1])}%''')
-print(f'''Recall : {100*cf[1][1]/(cf[1][0]+cf[1][1])}%''')
+print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])} %''')
+print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1])} %''')
+print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1])} %''')
 
 cap.release()
 cv2.destroyAllWindows()
