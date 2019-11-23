@@ -163,6 +163,7 @@ while(ret):
         histFOOld = histFONew
 
         '''
+        Função para automartizar os processos de inicialização 
         # Reinitialization 
         def reinitialization():
             hist_average_temp = hist_total/frames_per_plan
