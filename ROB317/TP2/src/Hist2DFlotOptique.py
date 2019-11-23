@@ -77,10 +77,11 @@ flow1 = cv2.calcOpticalFlowFarneback(prvs1,prvs,None,
                                     poly_sigma = poly_sigma, # E-T Gaussienne pour calcul dérivées
                                     flags = flags)
 
-mag1, ang1 = cv2.cartToPolar(flow1[:,:,0], flow1[:,:,1]) # Conversion cartésien vers polaire
-bgrPolar1[:,:,0] = 180*ang1/(2*np.pi)
-bgrPolar1[:,:,1] = 180*mag1/np.amax(mag1) # Valeur <--> Norme
-histFOOld = cv2.calcHist([bgrPolar1], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+#mag1, ang1 = cv2.cartToPolar(flow1[:,:,0], flow1[:,:,1]) # Conversion cartésien vers polaire
+#bgrPolar1[:,:,0] = 180*ang1/(2*np.pi)
+#bgrPolar1[:,:,1] = 180*mag1/np.amax(mag1) # Valeur <--> Norme
+#histFOOld = cv2.calcHist([bgrPolar1], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+histFOOld = cv2.calcHist([flow1], [1,0], None, [2*h/r,2*w/r], [-h/q,h/q,-w/q,w/q])
 
 while(ret):
     flow2 = cv2.calcOpticalFlowFarneback(next,prvs,None,
@@ -92,20 +93,19 @@ while(ret):
                                         poly_sigma = poly_sigma, # E-T Gaussienne pour calcul dérivées
                                         flags = flags)
 
-    mag2, ang2 = cv2.cartToPolar(flow2[:,:,0], flow2[:,:,1]) # Conversion cartésien vers polaire
-    bgrPolar2[:,:,0] = 180*ang2/(2*np.pi)
-    bgrPolar2[:,:,1] = 180*mag2/np.amax(mag2) # Valeur <--> Norme
+    histFONew = cv2.calcHist([flow2], [1,0], None, [2*h/r,2*w/r], [-h/q,h/q,-w/q,w/q])
+#    mag2, ang2 = cv2.cartToPolar(flow2[:,:,0], flow2[:,:,1]) # Conversion cartésien vers polaire
+#    bgrPolar2[:,:,0] = 180*ang2/(2*np.pi)
+#    bgrPolar2[:,:,1] = 180*mag2/np.amax(mag2) # Valeur <--> Norme
 #    cv2.imshow('Histogram 2D de (Vx,Vy)', histFOOld/(h*w))
 
-    histFONew = cv2.calcHist([bgrPolar2], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+#    histFONew = cv2.calcHist([bgrPolar2], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
 #    cv2.imshow('Histogram 2D de (Vx,Vy)', histFONew/(h*w))
 
     hTest = cv2.compareHist(histFONew,histFOOld,0)
 
-    result = np.vstack((histFOOld/np.amax(histFOOld),histFONew/np.amax(histFONew)))
-
     cv2.imshow('Extrait',frame2)
-    cv2.imshow('Histogram de Champs de vitesses (Farnebäck)',result)
+    cv2.imshow('Histogram de Champs de vitesses (Farnebäck)',histFONew/np.amax(histFONew))
     k = cv2.waitKey(10) & 0xff
     prvs = next
     histFOOld = histFONew
@@ -122,9 +122,9 @@ print(f'''Tolerance           : {tol}''')
 print(f'''Nombre des raccords : {cut}''')
 print('Matrice de confusion   :')
 print(pd.DataFrame(cf))
-print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])} %''')
-print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1])} %''')
-print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1])} %''')
+print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %''')
 
 cap.release()
 cv2.destroyAllWindows()

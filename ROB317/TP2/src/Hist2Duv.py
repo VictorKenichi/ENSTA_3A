@@ -72,9 +72,9 @@ print(f'''Tolerance           : {tol}''')
 print(f'''Nombre des raccords : {cut}''')
 print('Matrice de confusion   :')
 print(pd.DataFrame(cf))
-print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])} %''')
-print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1])} %''')
-print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1])} %''')
+print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Precision : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Recall    : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %''')
 
 
 cap.release()
