@@ -157,7 +157,7 @@ while(ret):
         if hTestYuv<1-tolYuv and hTestFO<1-tolFO:
             cut += 1
             cutHist[index] = 1
-            print(f'''cutHist   [{index}] : {cutHist[index]}''')
+            print(f'''cutHist [{index}] : {cutHist[index]}''')
         index += 1
 
 cfYuv = confusion_matrix(cutTest,cutHistYuv)
@@ -165,19 +165,19 @@ cfFO  = confusion_matrix(cutTest,cutHistFO)
 cf    = confusion_matrix(cutTest,cutHist)
 
 # Statistiques
-print(f'''Tolerance de Yuv     : {tolYuv}''')
+print(f'Tolerance de Yuv     : {tolYuv}')
 print('Matrice de confusion de Yuv :')
 print(pd.DataFrame(cfYuv))
-print(f'''Accuracy de Yuv  : {(100*cfYuv[0][0]+cfYuv[1][1])/(cfYuv[0][0]+cfYuv[1][0]+cfYuv[0][1]+cfYuv[1][1])} %''')
-print(f'''Precision de Yuv : {100*cfYuv[1][1]/(cfYuv[0][1]+cfYuv[1][1])} %''')
-print(f'''Recall de Yuv    : {100*cfYuv[1][1]/(cfYuv[1][0]+cfYuv[1][1])} %''')
+print(f'''Accuracy de Yuv  : {(100*cfYuv[0][0]+cfYuv[1][1])/(cfYuv[0][0]+cfYuv[1][0]+cfYuv[0][1]+cfYuv[1][1]):.2f} %''')
+print(f'''Precision de Yuv : {100*cfYuv[1][1]/(cfYuv[0][1]+cfYuv[1][1]):.2f} %''')
+print(f'''Recall de Yuv    : {100*cfYuv[1][1]/(cfYuv[1][0]+cfYuv[1][1]):.2f} %''')
 
-print(f'''Tolerance de Flot Optique         : {tolFO}''')
+print(f'Tolerance de Flot Optique         : {tolFO}')
 print('Matrice de confusion de Flot Optique    :')
 print(pd.DataFrame(cfFO))
-print(f'''Accuracy de Flot Optique  : {(100*cfFO[0][0]+cfFO[1][1])/(cfFO[0][0]+cfFO[1][0]+cfFO[0][1]+cfFO[1][1])} %''')
-print(f'''Precision de Flot Optique : {100*cfFO[1][1]/(cfFO[0][1]+cfFO[1][1])} %''')
-print(f'''Recall de Flot Optique    : {100*cfFO[1][1]/(cfFO[1][0]+cfFO[1][1])} %''')
+print(f'''Accuracy de Flot Optique  : {(100*cfFO[0][0]+cfFO[1][1])/(cfFO[0][0]+cfFO[1][0]+cfFO[0][1]+cfFO[1][1]):.2f} %''')
+print(f'''Precision de Flot Optique : {100*cfFO[1][1]/(cfFO[0][1]+cfFO[1][1]):.2f} %''')
+print(f'''Recall de Flot Optique    : {100*cfFO[1][1]/(cfFO[1][0]+cfFO[1][1]):.2f} %''')
 
 print(f'''Nombre des raccords combiné : {cut}''')
 
@@ -185,9 +185,9 @@ print(f'''Tolerance de Yuv              : {tolYuv}''')
 print(f'''Tolerance de Flot Optique     : {tolFO}''')
 print('Matrice de confusion combiné :')
 print(pd.DataFrame(cf))
-print(f'''Accuracy combiné  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1])} %''')
-print(f'''Precision combiné : {100*cf[1][1]/(cf[0][1]+cf[1][1])} %''')
-print(f'''Recall combiné    : {100*cf[1][1]/(cf[1][0]+cf[1][1])} %''')
+print(f'''Accuracy combiné  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Precision combiné : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Recall combiné    : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %''')
 
 
 cap.release()
