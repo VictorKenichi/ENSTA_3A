@@ -18,37 +18,37 @@ video = int(input_args.video)
 
 if video == 1:
     cap = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
-    montageTest = pd.read_csv("../Montage/Montage_1.csv", index_col=0)
+    montageTest = pd.read_csv("../Validation/Montage_1.csv", index_col=0)
     tolYuv = 0.3
     tolFO = 0.05
     color = 3 # si 1 c'est gris et si 3 c'est coloré
 elif video == 2:
     cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
-    montageTest = pd.read_csv("../Montage/Montage_2.csv", index_col=0)
+    montageTest = pd.read_csv("../Validation/Montage_2.csv", index_col=0)
     tolYuv = 0.3
     tolFO = 0.2
     color = 1
 elif video == 3:
     cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
-    montageTest = pd.read_csv("../Montage/Montage_3.csv", index_col=0)
+    montageTest = pd.read_csv("../Validation/Montage_3.csv", index_col=0)
     tolYuv = 0.1
     tolFO = 0.1
     color = 3
 elif video == 4:
     cap = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
-    montageTest = pd.read_csv("../Montage/Montage_4.csv", index_col=0)
+    montageTest = pd.read_csv("../Validation/Montage_4.csv", index_col=0)
     tolYuv = 0.3
     tolFO = 0.15
     color = 1
 elif video == 5:
     cap = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
-    montageTest = pd.read_csv("../Montage/Montage_5.csv", index_col=0)
+    montageTest = pd.read_csv("../Validation/Montage_5.csv", index_col=0)
     tolYuv = 0.2
     tolFO = 0.23
     color = 3
 else:
     cap = cv2.VideoCapture(0)
-    montageTest = pd.read_csv("../Montage/Montage_0.csv", index_col=0)
+    montageTest = pd.read_csv("../Validation/Montage_0.csv", index_col=0)
     color = 3
 
 cutTest = montageTest["Raccord"].to_numpy()
@@ -169,15 +169,15 @@ print(f'Tolerance de Yuv     : {tolYuv}')
 print('Matrice de confusion de Yuv :')
 print(pd.DataFrame(cfYuv))
 print(f'''Accuracy de Yuv  : {(100*cfYuv[0][0]+cfYuv[1][1])/(cfYuv[0][0]+cfYuv[1][0]+cfYuv[0][1]+cfYuv[1][1]):.2f} %''')
-print(f'''Precision de Yuv : {100*cfYuv[1][1]/(cfYuv[0][1]+cfYuv[1][1]):.2f} %''')
-print(f'''Recall de Yuv    : {100*cfYuv[1][1]/(cfYuv[1][0]+cfYuv[1][1]):.2f} %''')
+print(f'''Précision de Yuv : {100*cfYuv[1][1]/(cfYuv[0][1]+cfYuv[1][1]):.2f} %''')
+print(f'''Rappel de Yuv    : {100*cfYuv[1][1]/(cfYuv[1][0]+cfYuv[1][1]):.2f} %''')
 
 print(f'Tolerance de Flot Optique         : {tolFO}')
 print('Matrice de confusion de Flot Optique    :')
 print(pd.DataFrame(cfFO))
 print(f'''Accuracy de Flot Optique  : {(100*cfFO[0][0]+cfFO[1][1])/(cfFO[0][0]+cfFO[1][0]+cfFO[0][1]+cfFO[1][1]):.2f} %''')
-print(f'''Precision de Flot Optique : {100*cfFO[1][1]/(cfFO[0][1]+cfFO[1][1]):.2f} %''')
-print(f'''Recall de Flot Optique    : {100*cfFO[1][1]/(cfFO[1][0]+cfFO[1][1]):.2f} %''')
+print(f'''Précision de Flot Optique : {100*cfFO[1][1]/(cfFO[0][1]+cfFO[1][1]):.2f} %''')
+print(f'''Rappel de Flot Optique    : {100*cfFO[1][1]/(cfFO[1][0]+cfFO[1][1]):.2f} %''')
 
 print(f'''Nombre des raccords combiné : {cut}''')
 
@@ -186,8 +186,8 @@ print(f'''Tolerance de Flot Optique     : {tolFO}''')
 print('Matrice de confusion combiné :')
 print(pd.DataFrame(cf))
 print(f'''Accuracy combiné  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %''')
-print(f'''Precision combiné : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %''')
-print(f'''Recall combiné    : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %''')
+print(f'''Précision combiné : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Rappel combiné    : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %''')
 
 
 cap.release()
