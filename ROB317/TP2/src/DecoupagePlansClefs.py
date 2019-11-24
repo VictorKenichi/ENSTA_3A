@@ -236,7 +236,6 @@ cfYuv = confusion_matrix(cutTest, cutHistYuv)
 cfFO  = confusion_matrix(cutTest, cutHistFO)
 cf    = confusion_matrix(cutTest, cutHist)
 
-
 print(f''' Numéro de quadros                    : {frames_total}''')
 print(f''' Tamanho do vetor de histograma medio : {len(hist_average)}''')
 
