@@ -72,6 +72,7 @@ frames_total    = 1          # Compteur de frames total
 hist_average    = []   
 frame_bounds    = []
 main_frame      = []
+main_frame_index = []
 nTicks          = 4
 ret, frame0     = cap.read()
 
@@ -213,27 +214,30 @@ for i in range(0, len(hist_average)):
 
         correlation_max = 0
         main_frame.append(0)
+        main_frame_index.append(0)
 
         #cv2.imshow('Image et Champ de vitesses (Farnebäck)', frame2)
         k = cv2.waitKey(5) & 0xff
 
         ret, frame_compare  = cap2.read()
-        yuv                 = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2YUV)
-        next                = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2GRAY)
+        if(ret):
+            yuv                 = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2YUV)
+            next                = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2GRAY)
+        
+            if color == 3: 
+                histYuvNew      = cv2.calcHist([yuv], [1,2], None, [bin, bin], [0, 256, 0, 256]).astype('float32')
+                hist_average[i].astype('float32')
+                hTest_corre     = cv2.compareHist(hist_average[i], histYuvNew, 0)
 
-        if color == 3: 
-            histYuvNew      = cv2.calcHist([yuv], [1,2], None, [bin, bin], [0, 256, 0, 256]).astype('float32')
-            hist_average[i].astype('float32')
-            hTest_corre     = cv2.compareHist(hist_average[i], histYuvNew, 0)
+            else:
+                hist_frame_gray = cv2.calcHist([next], [0], None, [bin], [0, 256])
+                hTest_corre     = cv2.compareHist(hist_average[i], hist_frame_gray, 0)
 
-        else:
-            hist_frame_gray = cv2.calcHist([next], [0], None, [bin], [0, 256])
-            hTest_corre     = cv2.compareHist(hist_average[i], hist_frame_gray, 0)
-
-        # Percorrer todas as imagens e buscar a maior correlação 
-        if(hTest_corre > correlation_max):
-            correlation_max = hTest_corre
-            main_frame[i]   = frame_compare
+            # Percorrer todas as imagens e buscar a maior correlação 
+            if(hTest_corre > correlation_max):
+                correlation_max     = hTest_corre
+                main_frame[i]       = frame_compare
+                main_frame_index[i] = frame_index
 
     frame_index += 1
 
@@ -243,8 +247,7 @@ for i in range(0, len(hist_average)):
 '''
 Cette partie est destinée à sauvegarder les images
 '''
-
-ret, frame     = cap3.read()
+#ret, frame_clef     = cap3.read()
 
 while(ret):
     print("###  Entrou no Terceiro LooP  ###")
@@ -253,14 +256,15 @@ while(ret):
     ret, frame_clef     = cap3.read()
     frame_index         = 1
 
-    # Sauvegarder l'image
-    for i in main_frame:
-        if(main_frame[i] == frame_index):
+    if(ret):
+        # Sauvegarder l'image
+        #for i in main_frame:
+        if(main_frame_index[i] == frame_index):
             print("teste Debug")
             cv2.imwrite('../Images_Plan_Clefs/Frame_%04d.png'%frame_index, frame_clef)
-    
-    frame_index += 1
         
+    frame_index += 1
+            
     print("###  Saiu no Terceiro LooP  ###")
 
 cfYuv = confusion_matrix(cutTest, cutHistYuv)
