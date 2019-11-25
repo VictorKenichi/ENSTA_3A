@@ -47,6 +47,9 @@ elif video == 4:
 
 elif video == 5:
     cap         = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+    cap2        = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+    cap3        = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+
     montageTest = pd.read_csv("../Validation/Montage_5.csv", index_col=0)
     tolYuv      = 0.2
     tolFO       = 0.23
@@ -66,6 +69,9 @@ index           = 3
 cut             = 0
 frames_per_plan = 1          # Compteur de frames entre le changement de plan
 frames_total    = 1          # Compteur de frames total
+hist_average    = []   
+frame_bounds    = []
+main_frame      = []
 nTicks          = 4
 ret, frame0     = cap.read()
 
@@ -80,8 +86,8 @@ ret, frame1     = cap.read()                              # Passe à l'image sui
 prvs            = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
 ret, frame2     = cap.read()
 
-yuv  = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
-next = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+yuv             = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
+next            = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
 
 if color == 3:
     print("Film Coloré")
@@ -113,16 +119,11 @@ bgrPolarOld[:,:,0] = 180*angOld/(2*np.pi)
 bgrPolarOld[:,:,1] = 180*magOld/np.amax(magOld) # Valeur <--> Norme
 histFOOld          = cv2.calcHist([bgrPolarOld], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
 
-# Initialisation de Histogrammes 
-hist_average       = []   
-hist_average_temp  = histFOOld
-hist_total         = hist_average_temp
-
 # === Prémier Loop
 
 while(ret):
     cv2.imshow('Image et Champ de vitesses (Farnebäck)', frame2)
-    k = cv2.waitKey(5) & 0xff
+    k = cv2.waitKey(1) & 0xff
 
     flowNew = cv2.calcOpticalFlowFarneback(next, prvs, None,
                                            pyr_scale  = pyr_scale,  # Taux de réduction pyramidal
@@ -133,104 +134,134 @@ while(ret):
                                            poly_sigma = poly_sigma, # E-T Gaussienne pour calcul dérivées
                                            flags      = flags)
 
-    magNew, angNew     = cv2.cartToPolar(flowNew[:,:,0], flowNew[:,:,1]) # Conversion cartésien vers polaire
-    bgrPolarNew[:,:,0] = 180*angNew/(2*np.pi)
-    bgrPolarNew[:,:,1] = 180*magNew/np.amax(magNew) # Valeur <--> Norme
+    magNew, angNew         = cv2.cartToPolar(flowNew[:,:,0], flowNew[:,:,1]) # Conversion cartésien vers polaire
+    bgrPolarNew[:,:,0]     = 180*angNew/(2*np.pi)
+    bgrPolarNew[:,:,1]     = 180*magNew/np.amax(magNew) # Valeur <--> Norme
 
     histFONew  = cv2.calcHist([bgrPolarNew], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
-    hist_total = hist_total + histFONew
-
-
-    frames_per_plan += 1 
-    frames_total    += 1
-    print(frames_per_plan)
-
-    if color == 3:
-        histYuvOld   = histYuvNew.copy()
+    
+    frames_per_plan       += 1 
+    frames_total          += 1
+      
+    if color == 3:  
+        histYuvOld         = histYuvNew.copy()
     else: 
-        histGrayOld  = histGrayNew.copy()
+        histGrayOld        = histGrayNew.copy()
 
     prvs = next
 
     ret, frame2 = cap.read()
     if(ret):
-        yuv  = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
-        next = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+        yuv     = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
+        next    = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+   
+        if color == 3:   
+            histYuvNew         = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
+            hTestYuv           = cv2.compareHist(histYuvOld, histYuvNew, 0)
 
-        if color == 3:
-            histYuvNew  = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
-            hTestYuv    = cv2.compareHist(histYuvOld, histYuvNew, 0)
+            # Initialisation de Histogrammes 
+            hist_average_temp  = histYuvOld
+            hist_total         = hist_average_temp
+            hist_total         = hist_total + histYuvNew
+
         else:
-            histGrayNew = cv2.calcHist([next], [0], None, [bin], [0,256])
-            hTestYuv    = cv2.compareHist(histGrayOld, histGrayNew, 0)
+            histGrayNew        = cv2.calcHist([next], [0], None, [bin], [0,256])
+            hTestYuv           = cv2.compareHist(histGrayOld, histGrayNew, 0)
 
-        hTestFO         = cv2.compareHist(histFONew, histFOOld, 0)
-        histFOOld       = histFONew
+            # Initialisation de Histogrammes 
+            hist_average_temp  = histGrayOld
+            hist_total         = hist_average_temp
+            hist_total         = hist_total + histGrayNew
 
-        '''
-        Função para automartizar os processos de inicialização 
-        # Reinitialization 
-        def reinitialization():
-            hist_average_temp = hist_total/frames_per_plan
-            hist_average.append(hist_average_temp)
-
-            print(frames_per_plan)
-
-            hist_total        = histFONew
-            hist_average_temp = hist_total 
-            frames_per_plan   = 1 
-        '''
+        hTestFO                = cv2.compareHist(histFONew, histFOOld, 0)
+        histFOOld              = histFONew
 
         # Détection de changement de plan 
         if hTestYuv < 1 - tolYuv:
             cutHistYuv[index] = 1
 
         if hTestFO < 1 - tolFO:
-            cutHistFO[index] = 1
+            cutHistFO[index]  = 1
 
         if hTestYuv < 1 - tolYuv and hTestFO < 1 - tolFO:
             cut              += 1
             cutHist[index]    = 1
-            print(f'''cutHist   [{index}] : {cutHist[index]}''')
             
-            # Reinitialization des Paramètres
             hist_average_temp = hist_total/frames_per_plan
             hist_average.append(hist_average_temp)
 
-            #print(frames_per_plan)
-
-            hist_total        = histFONew
-            hist_average_temp = hist_total 
+            # Reinitialization des Paramètres
+            hist_total        = 0
+            hist_average_temp = 0 
             frames_per_plan   = 1 
+
+            # Recuperer le frame du changement de cadre
+            frame_bounds.append(index)
 
         index += 1
 
 # === Deuxième Loop
+
 # Comparer chaque frame avec le histrogrammes moyens capturés
+# Trouver l'histrogramme qui se rassemble le plus avec le histogramme moyen 
+for i in range(0, len(hist_average)):
+    frame_index         = 1
+
+    for j in range(frame_index, frame_bounds[i]):
+
+        print("Entrou Segundo Loop")
+
+        correlation_max = 0
+        main_frame.append(0)
+
+        #cv2.imshow('Image et Champ de vitesses (Farnebäck)', frame2)
+        k = cv2.waitKey(5) & 0xff
+
+        ret, frame_compare  = cap2.read()
+        yuv                 = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2YUV)
+        next                = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2GRAY)
+
+        if color == 3: 
+            histYuvNew      = cv2.calcHist([yuv], [1,2], None, [bin, bin], [0, 256, 0, 256]).astype('float32')
+            hist_average[i].astype('float32')
+            hTest_corre     = cv2.compareHist(hist_average[i], histYuvNew, 0)
+
+        else:
+            hist_frame_gray = cv2.calcHist([next], [0], None, [bin], [0, 256])
+            hTest_corre     = cv2.compareHist(hist_average[i], hist_frame_gray, 0)
+
+        # Percorrer todas as imagens e buscar a maior correlação 
+        if(hTest_corre > correlation_max):
+            correlation_max = hTest_corre
+            main_frame[i]   = frame_compare
+
+    frame_index += 1
+
+    print("###  Saiu do Segundo LooP  ###")
+
+# === Troisième Loop
+'''
+Cette partie est destinée à sauvegarder les images
+'''
+
+ret, frame     = cap3.read()
+
 while(ret):
+    print("###  Entrou no Terceiro LooP  ###")
 
-    # Trouver l'histrogramme qui se rassemble le plus avec le histogramme moyen 
-    for i in hist_average:
-        for j in range(0, frames_total): 
-            ret, frame_compare  = cap.read()
-            yuv                 = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2YUV)
-            next                = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2GRAY)
-            frame_index         = 1
- 
-            if color == 3: 
-                histYuvNew      = cv2.calcHist([yuv], [1,2], None, [bin, bin], [0, 256, 0, 256])
-                hTestYuv        = cv2.compareHist(i, histYuvNew, 0)
+    #cv2.imshow('Image et Champ de vitesses (Farnebäck)', frame2)
+    ret, frame_clef     = cap3.read()
+    frame_index         = 1
 
-            else:
-                hist_frame_gray = cv2.calcHist([next], [0], None, [bin], [0, 256])
-                hTestYuv        = cv2.compareHist(i, hist_frame_gray, 0)
-
-            frame_index += 1
-
-            # Percorrer todas as imagens e buscar a maior correlação 
-
-            # Sauvegarder l'image
-            cv2.imwrite('../Images_Plan_Clefs/Frame_%04d.png'%frame_index, frame_compare)
+    # Sauvegarder l'image
+    for i in main_frame:
+        if(main_frame[i] == frame_index):
+            print("teste Debug")
+            cv2.imwrite('../Images_Plan_Clefs/Frame_%04d.png'%frame_index, frame_clef)
+    
+    frame_index += 1
+        
+    print("###  Saiu no Terceiro LooP  ###")
 
 cfYuv = confusion_matrix(cutTest, cutHistYuv)
 cfFO  = confusion_matrix(cutTest, cutHistFO)
