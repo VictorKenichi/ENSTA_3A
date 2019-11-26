@@ -205,16 +205,19 @@ while(ret):
 
 # Comparer chaque frame avec le histrogrammes moyens capturés
 # Trouver l'histrogramme qui se rassemble le plus avec le histogramme moyen 
+
+frame_index         = 1
+
 for i in range(0, len(hist_average)):
-    frame_index         = 1
+    
+    main_frame.append(0)
+    main_frame_index.append(0)
 
     for j in range(frame_index, frame_bounds[i]):
 
         print("Entrou Segundo Loop")
 
         correlation_max = 0
-        main_frame.append(0)
-        main_frame_index.append(0)
 
         #cv2.imshow('Image et Champ de vitesses (Farnebäck)', frame2)
         k = cv2.waitKey(5) & 0xff
@@ -239,7 +242,8 @@ for i in range(0, len(hist_average)):
                 main_frame[i]       = frame_compare
                 main_frame_index[i] = frame_index
 
-    frame_index += 1
+        frame_index += 1
+        print(frame_index)
 
     print("###  Saiu do Segundo LooP  ###")
 
@@ -247,22 +251,21 @@ for i in range(0, len(hist_average)):
 '''
 Cette partie est destinée à sauvegarder les images
 '''
-#ret, frame_clef     = cap3.read()
+ret, frame_clef     = cap3.read()
+frame_index         = 1
 
 while(ret):
-    print("###  Entrou no Terceiro LooP  ###")
-
-    #cv2.imshow('Image et Champ de vitesses (Farnebäck)', frame2)
+    
+    print("###  Entrou no Terceiro LooP1  ###")
     ret, frame_clef     = cap3.read()
-    frame_index         = 1
 
-    if(ret):
-        # Sauvegarder l'image
-        #for i in main_frame:
+    # Sauvegarder l'image
+    for i in range(0, len(main_frame)):
+        print("###  Entrou no Terceiro LooP 2  ###")
         if(main_frame_index[i] == frame_index):
             print("teste Debug")
             cv2.imwrite('../Images_Plan_Clefs/Frame_%04d.png'%frame_index, frame_clef)
-        
+    
     frame_index += 1
             
     print("###  Saiu no Terceiro LooP  ###")
@@ -273,6 +276,9 @@ cf    = confusion_matrix(cutTest, cutHist)
 
 print(f''' Numéro de quadros                    : {frames_total}''')
 print(f''' Tamanho do vetor de histograma medio : {len(hist_average)}''')
+print(f''' Tamanho do vetor do main frame       : {len(main_frame)}''')
+print(f''' Tamanho do vetor do main frame       : {len(main_frame_index)}''')
+print(f''' Tamanho do vetor do main frame       : {main_frame_index}''')
 
 # === Statistiques
 print(f'''Tolerance de Yuv                  : {tolYuv}''')
