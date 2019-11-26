@@ -18,77 +18,89 @@ input_args = parser.parse_args()
 video      = int(input_args.video)
 
 if video == 1:
-    cap         = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
-    montageTest = pd.read_csv("../Validation/Montage.csv", index_col=0)
-    tolYuv      = 0.3
-    tolFO       = 0.05
-    color       = 3 # si 1 c'est gris et si 3 c'est coloré
+    cap          = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
+    cap2         = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
+    cap3         = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
+
+    montageTest  = pd.read_csv("../Validation/Montage.csv", index_col=0)
+    tolYuv       = 0.3
+    tolFO        = 0.05
+    color        = 3 # si 1 c'est gris et si 3 c'est coloré
 
 elif video == 2:
-    cap         = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+    cap          = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+    cap2         = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+    cap3         = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
+
     ValidationTest = pd.read_csv("../Validation/Montage.csv", index_col=0)
-    tolYuv      = 0.3
-    tolFO       = 0.2
-    color       = 1
+    tolYuv       = 0.3
+    tolFO        = 0.2
+    color        = 1
 
-elif video == 3:
-    cap         = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
-    montageTest = pd.read_csv("../Validation/Montage_3.csv", index_col=0)
-    tolYuv      = 0.1
-    tolFO       = 0.1
-    color       = 3
+elif video == 3: 
+    cap          = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
+    cap2         = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
+    cap3         = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
 
-elif video == 4:
-    cap         = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
-    montageTest = pd.read_csv("../Validation/Montage_4.csv", index_col=0)
-    tolYuv      = 0.3
-    tolFO       = 0.15
-    color       = 1
+    montageTest  = pd.read_csv("../Validation/Montage_3.csv", index_col=0)
+    tolYuv       = 0.1
+    tolFO        = 0.1
+    color        = 3
 
-elif video == 5:
-    cap         = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
-    cap2        = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
-    cap3        = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+elif video == 4: 
+    cap          = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
+    cap2         = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
+    cap3         = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
 
-    montageTest = pd.read_csv("../Validation/Montage_5.csv", index_col=0)
-    tolYuv      = 0.2
-    tolFO       = 0.23
-    color       = 3
+    montageTest  = pd.read_csv("../Validation/Montage_4.csv", index_col=0)
+    tolYuv       = 0.3
+    tolFO        = 0.15
+    color        = 1
 
-else:
-    cap         = cv2.VideoCapture(0)
-    montageTest = pd.read_csv("../Validation/Montage_0.csv", index_col=0)
-    color       = 3
+elif video == 5: 
+    cap          = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+    cap2         = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
+    cap3         = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
 
-cutTest         = montageTest["Raccord"].to_numpy()
-cutHistFO       = np.zeros_like(cutTest)
-cutHistYuv      = np.zeros_like(cutTest)
-cutHist         = np.zeros_like(cutTest)
+    montageTest  = pd.read_csv("../Validation/Montage_5.csv", index_col=0)
+    tolYuv       = 0.2
+    tolFO        = 0.23
+    color        = 3
+
+else: 
+    cap          = cv2.VideoCapture(0)
+    montageTest  = pd.read_csv("../Validation/Montage_0.csv", index_col=0)
+    color        = 3
+
+cutTest          = montageTest["Raccord"].to_numpy()
+cutHistFO        = np.zeros_like(cutTest)
+cutHistYuv       = np.zeros_like(cutTest)
+cutHist          = np.zeros_like(cutTest)
      
-index           = 3
-cut             = 0
-frames_per_plan = 1          # Compteur de frames entre le changement de plan
-frames_total    = 1          # Compteur de frames total
-hist_average    = []   
-frame_bounds    = []
-main_frame      = []
+index            = 3
+cut              = 0
+frames_per_plan  = 1          # Compteur de frames entre le changement de plan
+frames_total     = 1          # Compteur de frames total
+hist_average     = []   
+frame_bounds     = []
+main_frame       = []
 main_frame_index = []
-nTicks          = 4
-ret, frame0     = cap.read()
-
-h               = frame0.shape[0]
-w               = frame0.shape[1]
-    
-bgrPolarOld     = np.zeros(shape=(frame0.shape[0],frame0.shape[1],2), dtype='float32') # Image nulle de même taille que flow
-bgrPolarNew     = np.copy(bgrPolarOld)
-    
-prvs1           = cv2.cvtColor(frame0,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
-ret, frame1     = cap.read()                              # Passe à l'image suivante
-prvs            = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
-ret, frame2     = cap.read()
-
-yuv             = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
-next            = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+nTicks           = 4
+ret, frame0      = cap.read()
+ 
+h                = frame0.shape[0]
+w                = frame0.shape[1]
+     
+bgrPolarOld      = np.zeros(shape=(frame0.shape[0],frame0.shape[1],2), dtype='float32') # Image nulle de même taille que flow
+bgrPolarNew      = np.copy(bgrPolarOld)
+     
+prvs1            = cv2.cvtColor(frame0,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
+ret, frame1      = cap.read()                              # Passe à l'image suivante
+prvs             = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY) # Passage en niveaux de gris
+ret, frame2      = cap.read()
+ 
+yuv              = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
+next             = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
 
 if color == 3:
     print("Film Coloré")
@@ -98,13 +110,13 @@ else:
     histGrayNew = cv2.calcHist([next], [0], None, [bin], [0,256])
 
 # Paramètres de l'algorithem deu flot optique
-pyr_scale  = 0.5   # Taux de réduction pyramidal
-levels     = 3     # Nombre de niveaux de la pyramide
-winsize    = 15    # Taille de fenêtre de lissage (moyenne) des coefficients polynomiaux
-iterations = 3     # Nb d'itérations par niveau
-poly_n     = 7     # Taille voisinage pour approximation polynomiale
-poly_sigma = 1.5   # E-T Gaussienne pour calcul dérivées
-flags      = 0
+pyr_scale       = 0.5   # Taux de réduction pyramidal
+levels          = 3     # Nombre de niveaux de la pyramide
+winsize         = 15    # Taille de fenêtre de lissage (moyenne) des coefficients polynomiaux
+iterations      = 3     # Nb d'itérations par niveau
+poly_n          = 7     # Taille voisinage pour approximation polynomiale
+poly_sigma      = 1.5   # E-T Gaussienne pour calcul dérivées
+flags           = 0
 
 flowOld    = cv2.calcOpticalFlowFarneback(prvs1, prvs, None,
                                           pyr_scale  = pyr_scale,  # Taux de réduction pyramidal
@@ -206,7 +218,7 @@ while(ret):
 # Comparer chaque frame avec le histrogrammes moyens capturés
 # Trouver l'histrogramme qui se rassemble le plus avec le histogramme moyen 
 
-frame_index         = 1
+frame_index = 1
 
 for i in range(0, len(hist_average)):
     
@@ -214,15 +226,10 @@ for i in range(0, len(hist_average)):
     main_frame_index.append(0)
 
     for j in range(frame_index, frame_bounds[i]):
+        correlation_max         = 0
+        k                       = cv2.waitKey(5) & 0xff
+        ret, frame_compare      = cap2.read()
 
-        print("Entrou Segundo Loop")
-
-        correlation_max = 0
-
-        #cv2.imshow('Image et Champ de vitesses (Farnebäck)', frame2)
-        k = cv2.waitKey(5) & 0xff
-
-        ret, frame_compare  = cap2.read()
         if(ret):
             yuv                 = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2YUV)
             next                = cv2.cvtColor(frame_compare, cv2.COLOR_BGR2GRAY)
@@ -243,42 +250,27 @@ for i in range(0, len(hist_average)):
                 main_frame_index[i] = frame_index
 
         frame_index += 1
-        print(frame_index)
-
-    print("###  Saiu do Segundo LooP  ###")
 
 # === Troisième Loop
 '''
 Cette partie est destinée à sauvegarder les images
 '''
-ret, frame_clef     = cap3.read()
-frame_index         = 1
+ret, frame_clef       = cap3.read()
+frame_index           = 1
 
 while(ret):
-    
-    print("###  Entrou no Terceiro LooP1  ###")
-    ret, frame_clef     = cap3.read()
+    ret, frame_clef   = cap3.read()
 
     # Sauvegarder l'image
     for i in range(0, len(main_frame)):
-        print("###  Entrou no Terceiro LooP 2  ###")
         if(main_frame_index[i] == frame_index):
-            print("teste Debug")
             cv2.imwrite('../Images_Plan_Clefs/Frame_%04d.png'%frame_index, frame_clef)
     
     frame_index += 1
-            
-    print("###  Saiu no Terceiro LooP  ###")
 
 cfYuv = confusion_matrix(cutTest, cutHistYuv)
 cfFO  = confusion_matrix(cutTest, cutHistFO)
 cf    = confusion_matrix(cutTest, cutHist)
-
-print(f''' Numéro de quadros                    : {frames_total}''')
-print(f''' Tamanho do vetor de histograma medio : {len(hist_average)}''')
-print(f''' Tamanho do vetor do main frame       : {len(main_frame)}''')
-print(f''' Tamanho do vetor do main frame       : {len(main_frame_index)}''')
-print(f''' Tamanho do vetor do main frame       : {main_frame_index}''')
 
 # === Statistiques
 print(f'''Tolerance de Yuv                  : {tolYuv}''')
