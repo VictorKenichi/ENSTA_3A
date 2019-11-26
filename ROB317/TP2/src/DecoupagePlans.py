@@ -19,36 +19,42 @@ if video == 1:
     cap = cv2.VideoCapture("../Vidéos/Extrait1-Cosmos_Laundromat1(340p).m4v")
     montageTest = pd.read_csv("../Validation/Montage_1.csv", index_col=0)
     tolYuv = 0.7
-    tolFO  = 0.95
-    color  = 3 # si 1 c'est gris et si 3 c'est coloré
+    tolFO  = 0.995
+    color  = True
+    Polar = True
 elif video == 2:
     cap = cv2.VideoCapture("../Vidéos/Extrait2-ManWithAMovieCamera(216p).m4v")
     montageTest = pd.read_csv("../Validation/Montage_2.csv", index_col=0)
-    tolYuv = 0.7
-    tolFO  = 0.8
-    color  = 1
+    tolYuv = 0.71
+    tolFO  = 0.955
+    color  = False
+    Polar = True
 elif video == 3:
     cap = cv2.VideoCapture("../Vidéos/Extrait3-Vertigo-Dream_Scene(320p).m4v")
     montageTest = pd.read_csv("../Validation/Montage_3.csv", index_col=0)
-    tolYuv = 0.9
-    tolFO  = 0.9
-    color  = 3
+    tolYuv = 0.999
+    tolFO  = 0.645
+    color  = True
+    Polar = False
 elif video == 4:
     cap = cv2.VideoCapture("../Vidéos/Extrait4-Entracte-Poursuite_Corbillard(358p).m4v")
     montageTest = pd.read_csv("../Validation/Montage_4.csv", index_col=0)
     tolYuv = 0.7
-    tolFO  = 0.85
-    color  = 1
+    tolFO  = 0.99
+    color  = False
+    Polar = True
 elif video == 5:
     cap = cv2.VideoCapture("../Vidéos/Extrait5-Matrix-Helicopter_Scene(280p).m4v")
     montageTest = pd.read_csv("../Validation/Montage_5.csv", index_col=0)
-    tolYuv = 0.8
-    tolFO  = 0.77
-    color  = 3
+    tolYuv = 0.85
+    tolFO  = 1
+    color  = True
+    Polar = True
 else:
     cap = cv2.VideoCapture(0)
     montageTest = pd.read_csv("../Validation/Montage_0.csv", index_col=0)
-    color = 3
+    color = True
+    Polar = False
 
 cutTest    = montageTest["Raccord"].to_numpy()
 cutHistFO  = np.zeros_like(cutTest)
@@ -77,7 +83,7 @@ ret, frame2 = cap.read()
 yuv = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
 next = cv2.cvtColor(frame2,cv2.COLOR_BGR2GRAY)
 
-if color==3:
+if color:
     print("Film coloré")
     histYuvNew = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
 else:
@@ -102,16 +108,18 @@ flowOld = cv2.calcOpticalFlowFarneback(prvs1,prvs,None,
                                     poly_sigma = poly_sigma, # E-T Gaussienne pour calcul dérivées
                                     flags = flags)
 
-#magOld, angOld = cv2.cartToPolar(flowOld[:,:,0], flowOld[:,:,1]) # Conversion cartésien vers polaire
-#bgrPolarOld[:,:,0] = 180*angOld/(2*np.pi)
-#bgrPolarOld[:,:,1] = 180*magOld/np.amax(magOld) # Valeur <--> Norme
-#histFOOld = cv2.calcHist([bgrPolarOld], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
-histFOOld = cv2.calcHist([-flowOld], [1,0], None, [2*h/r,2*w/r], [-h/q,h/q,-w/q,w/q])
+if Polar:
+    magOld, angOld = cv2.cartToPolar(flowOld[:,:,0], flowOld[:,:,1]) # Conversion cartésien vers polaire
+    bgrPolarOld[:,:,0] = 180*angOld/(2*np.pi)
+    bgrPolarOld[:,:,1] = 180*magOld/(np.amax(magOld)+1) # Valeur <--> Norme
+    histFOOld = cv2.calcHist([bgrPolarOld], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+else:
+    histFOOld = cv2.calcHist([-flowOld], [1,0], None, [2*h/r,2*w/r], [-h/q,h/q,-w/q,w/q])
 
 while(ret):
-    cv2.imshow('Frame',frame2)
-#    cv2.imshow('Histogram 2D de (Vx,Vy)', histFOOld/np.amax(histFOOld))
-#    cv2.imshow('Histogram 2D de (u,v)',histYuvNew/np.amax(histYuvNew))
+#    cv2.imshow('Frame',frame2)
+#    cv2.imshow('Histogram 2D de (Vx,Vy)', histFOOld/(np.amax(histFOOld)+1))
+#    cv2.imshow('Histogram 2D de (u,v)',histYuvNew/(np.amax(histYuvNew)+1))
     k = cv2.waitKey(1) & 0xff
 
     flowNew = cv2.calcOpticalFlowFarneback(next,prvs,None,
@@ -123,14 +131,15 @@ while(ret):
                                         poly_sigma = poly_sigma, # E-T Gaussienne pour calcul dérivées
                                         flags = flags)
 
-#    magNew, angNew = cv2.cartToPolar(flowNew[:,:,0], flowNew[:,:,1]) # Conversion cartésien vers polaire
-#    bgrPolarNew[:,:,0] = 180*angNew/(2*np.pi)
-#    bgrPolarNew[:,:,1] = 180*magNew/np.amax(magNew) # Valeur <--> Norme
-#    histFONew = cv2.calcHist([bgrPolarNew], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+    if Polar:
+        magNew, angNew = cv2.cartToPolar(flowNew[:,:,0], flowNew[:,:,1]) # Conversion cartésien vers polaire
+        bgrPolarNew[:,:,0] = 180*angNew/(2*np.pi)
+        bgrPolarNew[:,:,1] = 180*magNew/(np.amax(magNew)+1) # Valeur <--> Norme
+        histFONew = cv2.calcHist([bgrPolarNew], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
+    else:
+        histFONew = cv2.calcHist([-flowNew], [1,0], None, [2*h/r,2*w/r], [-h/q,h/q,-w/q,w/q])
 
-    histFONew = cv2.calcHist([-flowNew], [1,0], None, [2*h/r,2*w/r], [-h/q,h/q,-w/q,w/q])
-
-    if color==3:
+    if color:
         histYuvOld = histYuvNew.copy()
     else:
         histGrayOld = histGrayNew.copy()
@@ -141,24 +150,24 @@ while(ret):
     if(ret):
         yuv = cv2.cvtColor(frame2, cv2.COLOR_BGR2YUV)
         next = cv2.cvtColor(frame2,cv2.COLOR_BGR2GRAY)
-        if color==3:
+        if color:
             histYuvNew = cv2.calcHist([yuv], [1,2], None, [bin,bin], [0,256,0,256])
-            hTestYuv = cv2.compareHist(histYuvOld,histYuvNew,0)
+            hTestYuv = cv2.compareHist(histYuvOld,histYuvNew,0) # métrique : corrélation
         else:
             histGrayNew = cv2.calcHist([next], [0], None, [bin], [0,256])
-            hTestYuv = cv2.compareHist(histGrayOld,histGrayNew,0)
-        hTestFO = cv2.compareHist(histFONew,histFOOld,0)
+            hTestYuv = cv2.compareHist(histGrayOld,histGrayNew,0) # métrique : corrélation
+        hTestFO = cv2.compareHist(histFONew,histFOOld,0) # métrique : corrélation
         histFOOld = histFONew
         if hTestYuv<tolYuv:
             cutHistYuv[index] = 1
-            #print(f'''cutHistYuv[{index}] : {cutHistYuv[index]}''')
+            #print(f'Raccord Yuv {index} : {hTestYuv:.2f}')
         if hTestFO<tolFO:
             cutHistFO[index] = 1
-            #print(f'''cutHistFO [{index}] : {cutHistFO[index]}''')
+            #print(f'Raccord Flot Optique {index} : {hTestFO:.2f}')
         if hTestYuv<tolYuv and hTestFO<tolFO:
             cut += 1
             cutHist[index] = 1
-            print(f'''cutHist [{index}] : {cutHist[index]}''')
+            #print(f'Raccord Combiné {index} : hTestYuv = {hTestYuv:.2f} et hTestFO = {hTestFO:.2f}')
         index += 1
 
 cfYuv = confusion_matrix(cutTest,cutHistYuv)
@@ -166,19 +175,31 @@ cfFO  = confusion_matrix(cutTest,cutHistFO)
 cf    = confusion_matrix(cutTest,cutHist)
 
 # Statistiques
-print(f'Tolerance de Yuv     : {tolYuv}')
-print('Matrice de confusion de Yuv :')
-print(pd.DataFrame(cfYuv))
-print(f'''Accuracy de Yuv  : {(100*cfYuv[0][0]+cfYuv[1][1])/(cfYuv[0][0]+cfYuv[1][0]+cfYuv[0][1]+cfYuv[1][1]):.2f} %''')
-print(f'''Précision de Yuv : {100*cfYuv[1][1]/(cfYuv[0][1]+cfYuv[1][1]):.2f} %''')
-print(f'''Rappel de Yuv    : {100*cfYuv[1][1]/(cfYuv[1][0]+cfYuv[1][1]):.2f} %''')
+if color:
+    print(f'Tolerance de Yuv     : {tolYuv}')
+    print('Matrice de confusion de Yuv :')
+    print(pd.DataFrame(cfYuv))
+    print(f'Exactitude de Yuv : {(100*cfYuv[0][0]+cfYuv[1][1])/(cfYuv[0][0]+cfYuv[1][0]+cfYuv[0][1]+cfYuv[1][1]):.2f} %')
+    print(f'Précision de Yuv  : {100*cfYuv[1][1]/(cfYuv[0][1]+cfYuv[1][1]):.2f} %')
+    print(f'Rappel de Yuv     : {100*cfYuv[1][1]/(cfYuv[1][0]+cfYuv[1][1]):.2f} %')
+else:
+    print(f'Tolerance de Gris     : {tolYuv}')
+    print('Matrice de confusion de Gris :')
+    print(pd.DataFrame(cfYuv))
+    print(f'Exactitude de Gris : {(100*cfYuv[0][0]+cfYuv[1][1])/(cfYuv[0][0]+cfYuv[1][0]+cfYuv[0][1]+cfYuv[1][1]):.2f} %')
+    print(f'Précision de Gris  : {100*cfYuv[1][1]/(cfYuv[0][1]+cfYuv[1][1]):.2f} %')
+    print(f'Rappel de Gris     : {100*cfYuv[1][1]/(cfYuv[1][0]+cfYuv[1][1]):.2f} %')
 
 print(f'Tolerance de Flot Optique         : {tolFO}')
+if Polar:
+    print('Coordonées polaires')
+else:
+    print('Coordonées cartésiennes')
 print('Matrice de confusion de Flot Optique    :')
 print(pd.DataFrame(cfFO))
-print(f'''Accuracy de Flot Optique  : {(100*cfFO[0][0]+cfFO[1][1])/(cfFO[0][0]+cfFO[1][0]+cfFO[0][1]+cfFO[1][1]):.2f} %''')
-print(f'''Précision de Flot Optique : {100*cfFO[1][1]/(cfFO[0][1]+cfFO[1][1]):.2f} %''')
-print(f'''Rappel de Flot Optique    : {100*cfFO[1][1]/(cfFO[1][0]+cfFO[1][1]):.2f} %''')
+print(f'Exactitude de Flot Optique : {(100*cfFO[0][0]+cfFO[1][1])/(cfFO[0][0]+cfFO[1][0]+cfFO[0][1]+cfFO[1][1]):.2f} %')
+print(f'Précision de Flot Optique  : {100*cfFO[1][1]/(cfFO[0][1]+cfFO[1][1]):.2f} %')
+print(f'Rappel de Flot Optique     : {100*cfFO[1][1]/(cfFO[1][0]+cfFO[1][1]):.2f} %')
 
 print(f'''Nombre des raccords combiné : {cut}''')
 
@@ -186,9 +207,9 @@ print(f'''Tolerance de Yuv              : {tolYuv}''')
 print(f'''Tolerance de Flot Optique     : {tolFO}''')
 print('Matrice de confusion combiné :')
 print(pd.DataFrame(cf))
-print(f'''Accuracy combiné  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %''')
-print(f'''Précision combiné : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %''')
-print(f'''Rappel combiné    : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %''')
+print(f'Exactitude combinée : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %')
+print(f'Précision combinée  : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %')
+print(f'Rappel combiné      : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %')
 
 
 cap.release()

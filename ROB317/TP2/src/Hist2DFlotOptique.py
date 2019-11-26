@@ -78,7 +78,7 @@ flow1 = cv2.calcOpticalFlowFarneback(prvs1,prvs,None,
 
 #mag1, ang1 = cv2.cartToPolar(flow1[:,:,0], flow1[:,:,1]) # Conversion cartésien vers polaire
 #bgrPolar1[:,:,0] = 180*ang1/(2*np.pi)
-#bgrPolar1[:,:,1] = 180*mag1/np.amax(mag1) # Valeur <--> Norme
+#bgrPolar1[:,:,1] = 180*mag1/(np.amax(mag1)+1) # Valeur <--> Norme
 #histFOOld = cv2.calcHist([bgrPolar1], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
 histFOOld = cv2.calcHist([-flow1], [1,0], None, [2*h/r,2*w/r], [-h/q,h/q,-w/q,w/q])
 
@@ -101,16 +101,16 @@ while(ret):
 #    histFONew = cv2.calcHist([bgrPolar2], [1,0], None, [180/r,180/r], [0,180/q,0,180/q])
 #    cv2.imshow('Histogram 2D de (Vx,Vy)', histFONew/(h*w))
 
-    hTest = cv2.compareHist(histFONew,histFOOld,0)
+    hTest = cv2.compareHist(histFONew,histFOOld,0) # métrique : corrélation
 
     cv2.imshow('Frame',frame2)
-    cv2.imshow('Histogram de Champs de vitesses (Farnebäck)',cv2.resize(histFONew/np.amax(histFONew),(w,h)))
+    cv2.imshow('Histogram de Champs de vitesses (Farnebäck)',cv2.resize(histFONew/(np.amax(histFONew)+1),(w,h)))
     k = cv2.waitKey(1) & 0xff
     if k == 27:
         break
     elif k == ord('s'):
         cv2.imwrite('../Images/Frame_%04d.png'%index,frame)
-        cv2.imwrite('../Images/Hist2DFlowOptique_%04d.png'%index,cv2.resize(histFONew/np.amax(histFONew),(h,w)))
+        cv2.imwrite('../Images/Hist2DFlowOptique_%04d.png'%index,cv2.resize(histFONew/(np.amax(histFONew)+1),(h,w)))
     prvs = next
     histFOOld = histFONew
     ret, frame2 = cap.read()
@@ -119,6 +119,7 @@ while(ret):
         if hTest<tol:
             cut += 1
             cutHist[index] = 1
+            print(f'Raccord {index} : {hTest:.2f}')
         index += 1
 
 # Statistiques
@@ -127,7 +128,7 @@ print(f'''Tolerance           : {tol}''')
 print(f'''Nombre des raccords : {cut}''')
 print('Matrice de confusion   :')
 print(pd.DataFrame(cf))
-print(f'''Accuracy  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %''')
+print(f'''Exactitude  : {(100*cf[0][0]+cf[1][1])/(cf[0][0]+cf[1][0]+cf[0][1]+cf[1][1]):.2f} %''')
 print(f'''Précision : {100*cf[1][1]/(cf[0][1]+cf[1][1]):.2f} %''')
 print(f'''Rappel    : {100*cf[1][1]/(cf[1][0]+cf[1][1]):.2f} %''')
 
